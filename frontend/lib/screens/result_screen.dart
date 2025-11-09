@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/prediction_provider.dart';
@@ -15,10 +15,10 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final predictionProvider = Provider.of<PredictionProvider>(context);
     final prediction = predictionProvider.predictionResponse;
-    final selectedImage = predictionProvider.selectedImage;
+    final selectedImageBytes = predictionProvider.selectedImageBytes;
 
     // Handle case where no prediction is available
-    if (prediction == null || selectedImage == null) {
+    if (prediction == null || selectedImageBytes == null) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Results'),
@@ -52,7 +52,7 @@ class ResultScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Uploaded Image
-              _buildUploadedImage(context, selectedImage),
+              _buildUploadedImage(context, selectedImageBytes),
               
               const SizedBox(height: 20),
               
@@ -94,7 +94,7 @@ class ResultScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUploadedImage(BuildContext context, File imageFile) {
+  Widget _buildUploadedImage(BuildContext context, Uint8List imageBytes) {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -103,8 +103,8 @@ class ResultScreen extends StatelessWidget {
           // Image
           AspectRatio(
             aspectRatio: 16 / 9,
-            child: Image.file(
-              imageFile,
+            child: Image.memory(
+              imageBytes,
               fit: BoxFit.cover,
             ),
           ),

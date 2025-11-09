@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../models/prediction_response.dart';
 import '../services/api_service.dart';
@@ -8,8 +8,11 @@ class PredictionProvider extends ChangeNotifier {
   // Current prediction response
   PredictionResponse? _predictionResponse;
   
-  // Selected image file
-  File? _selectedImage;
+  // Selected image bytes
+  Uint8List? _selectedImageBytes;
+  
+  // Selected image file name
+  String? _selectedImageName;
   
   // Loading state
   bool _isLoading = false;
@@ -19,15 +22,17 @@ class PredictionProvider extends ChangeNotifier {
 
   // Getters
   PredictionResponse? get predictionResponse => _predictionResponse;
-  File? get selectedImage => _selectedImage;
+  Uint8List? get selectedImageBytes => _selectedImageBytes;
+  String? get selectedImageName => _selectedImageName;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasError => _errorMessage != null;
   bool get hasPrediction => _predictionResponse != null;
 
   /// Set the selected image
-  void setSelectedImage(File image) {
-    _selectedImage = image;
+  void setSelectedImage(Uint8List imageBytes, String imageName) {
+    _selectedImageBytes = imageBytes;
+    _selectedImageName = imageName;
     _errorMessage = null;
     notifyListeners();
   }
@@ -35,22 +40,24 @@ class PredictionProvider extends ChangeNotifier {
   /// Clear all data and reset state
   void reset() {
     _predictionResponse = null;
-    _selectedImage = null;
+    _selectedImageBytes = null;
+    _selectedImageName = null;
     _isLoading = false;
     _errorMessage = null;
     notifyListeners();
   }
 
   /// Make a prediction request
-  Future<void> makePrediction(File imageFile) async {
+  Future<void> makePrediction(Uint8List imageBytes, String fileName) async {
     _isLoading = true;
     _errorMessage = null;
-    _selectedImage = imageFile;
+    _selectedImageBytes = imageBytes;
+    _selectedImageName = fileName;
     notifyListeners();
 
     try {
       // Call API service
-      final response = await ApiService.predictLeaf(imageFile);
+      final response = await ApiService.predictLeaf(imageBytes, fileName);
       
       _predictionResponse = response;
       _isLoading = false;

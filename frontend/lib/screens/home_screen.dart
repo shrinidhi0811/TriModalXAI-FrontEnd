@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -188,25 +188,37 @@ class UploadButtons extends StatelessWidget {
       );
 
       if (pickedFile != null) {
-        final File imageFile = File(pickedFile.path);
+        // Read image as bytes (works on web and mobile)
+        final Uint8List imageBytes = await pickedFile.readAsBytes();
+        final String fileName = pickedFile.name;
         
         // Make prediction
-        await predictionProvider.makePrediction(imageFile);
-        
-        // Navigate to results screen on success
-        if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ResultScreen(),
-            ),
-          );
+        try {
+          await predictionProvider.makePrediction(imageBytes, fileName);
+          
+          // Only navigate if prediction was successful
+          if (context.mounted && predictionProvider.hasPrediction) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ResultScreen(),
+              ),
+            );
+          } else if (context.mounted && predictionProvider.hasError) {
+            // Show error if prediction failed
+            _showErrorDialog(context, predictionProvider.errorMessage ?? 'Unknown error');
+          }
+        } catch (e) {
+          // Show error dialog for prediction failures
+          if (context.mounted) {
+            _showErrorDialog(context, e.toString());
+          }
         }
       }
     } catch (e) {
-      // Show error dialog
+      // Show error dialog for image picker failures
       if (context.mounted) {
-        _showErrorDialog(context, e.toString());
+        _showErrorDialog(context, 'Failed to load image: ${e.toString()}');
       }
     }
   }
