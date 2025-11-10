@@ -117,10 +117,18 @@ class _GradcamCardState extends State<GradcamCard> {
                   
                   const SizedBox(height: 16),
                   
-                  // Grad-CAM Image
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: _buildGradcamImage(),
+                  // Grad-CAM Image with constrained size
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: 350, // Limit maximum height
+                        maxWidth: 500,  // Limit maximum width
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: _buildGradcamImage(),
+                      ),
+                    ),
                   ),
                   
                   const SizedBox(height: 12),

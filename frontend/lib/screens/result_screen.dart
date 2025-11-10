@@ -100,12 +100,16 @@ class ResultScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Image.memory(
-              imageBytes,
-              fit: BoxFit.cover,
+          // Image with constrained height
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: 300, // Limit maximum height
+              ),
+              child: Image.memory(
+                imageBytes,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           

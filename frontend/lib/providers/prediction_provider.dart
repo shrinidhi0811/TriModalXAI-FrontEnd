@@ -59,10 +59,22 @@ class PredictionProvider extends ChangeNotifier {
       // Call API service
       final response = await ApiService.predictLeaf(imageBytes, fileName);
       
+      print('🎉 API call successful, setting response...');
+      print('   - Response class: ${response.predictedClass}');
+      print('   - Response confidence: ${response.confidence}');
+      
       _predictionResponse = response;
       _isLoading = false;
       _errorMessage = null;
+      
+      print('✅ Provider state updated:');
+      print('   - _predictionResponse: $_predictionResponse');
+      print('   - hasPrediction: $hasPrediction');
+      print('   - isLoading: $_isLoading');
+      
       notifyListeners();
+      
+      print('✅ Listeners notified');
     } catch (e) {
       _isLoading = false;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');

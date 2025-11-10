@@ -22,9 +22,16 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
       body: SafeArea(
-        child: predictionProvider.isLoading
-            ? const LoadingView()
-            : const HomeContent(),
+        child: Stack(
+          children: [
+            const HomeContent(),
+            if (predictionProvider.isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const LoadingView(),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -196,17 +203,33 @@ class UploadButtons extends StatelessWidget {
         try {
           await predictionProvider.makePrediction(imageBytes, fileName);
           
+          print('🔍 After prediction:');
+          print('   - hasPrediction: ${predictionProvider.hasPrediction}');
+          print('   - hasError: ${predictionProvider.hasError}');
+          print('   - predictionResponse: ${predictionProvider.predictionResponse}');
+          print('   - context.mounted: ${context.mounted}');
+          
+          // Check context first
+          if (!context.mounted) {
+            print('⚠️ Context not mounted, cannot navigate');
+            return;
+          }
+          
           // Only navigate if prediction was successful
-          if (context.mounted && predictionProvider.hasPrediction) {
+          if (predictionProvider.hasPrediction) {
+            print('🚀 Navigating to ResultScreen...');
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => const ResultScreen(),
               ),
             );
-          } else if (context.mounted && predictionProvider.hasError) {
+          } else if (predictionProvider.hasError) {
+            print('❌ Has error, showing dialog');
             // Show error if prediction failed
             _showErrorDialog(context, predictionProvider.errorMessage ?? 'Unknown error');
+          } else {
+            print('⚠️ No prediction and no error - unexpected state');
           }
         } catch (e) {
           // Show error dialog for prediction failures
